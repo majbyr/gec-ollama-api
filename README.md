@@ -24,7 +24,7 @@ QUANTIZATION=full
 
 ### 2. Build and Deploy
 
-#### Using Docker Compose (Recommended)
+### Using Docker Compose
 
 For CPU deployment:
 ```bash
