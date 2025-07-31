@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+# gpu
+  ollama-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - HF_MODEL_NAME=${HF_MODEL_NAME}
+        - HF_TOKEN=${HF_TOKEN}
+        - MODEL_NAME=${MODEL_NAME:-custom-model}
+        - QUANTIZATION=${QUANTIZATION:-q4_k_m}
+        - TORCH_DEVICE=cuda
+    container_name: gec-ollama-api
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    volumes:
+      - ollama_data:/root/.ollama
+      - model_cache:/workspace/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    profiles:
+      - gpu
+
+  # cpu
+  ollama-api-cpu:
+    build:
+      context: .
+      dockerfile: Dockerfile.cpu
+      args:
+        - HF_MODEL_NAME=${HF_MODEL_NAME}
+        - HF_TOKEN=${HF_TOKEN}
+        - MODEL_NAME=${MODEL_NAME:-custom-model}
+        - QUANTIZATION=${QUANTIZATION:-q4_k_m}
+    container_name: gec-ollama-api-cpu
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    volumes:
+      - ollama_data:/root/.ollama
+      - model_cache:/workspace/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    profiles:
+      - cpu
+
+volumes:
+  ollama_data:
+    driver: local
+  model_cache:
+    driver: local
