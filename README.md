@@ -82,7 +82,7 @@ curl -X POST http://localhost:11434/api/generate \
   -H "Content-Type: application/json" \
   -d '{
     "model": "gec",
-    "prompt": "### Instruction:\nReply with a corrected version of the input essay in Estonian with all grammatical and spelling errors fixed. If there are no errors, reply with a copy of the original essay.\n\n### Input:\nMa lähen poodi ja ostan leiba.\n\n### Response:\n",
+    "prompt": "### Instruction:\nReply with a corrected version of the input essay in Estonian with all grammatical and spelling errors fixed. If there are no errors, reply with a copy of the original essay.\n\n### Input:\nMul on kaks koer ja üks kass\n\n### Response:\n",
     "stream": false,
     options: {
       "temperature": 0.7,
