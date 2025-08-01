@@ -12,7 +12,7 @@ services:
         - MODEL_NAME=${MODEL_NAME:-custom-model}
         - QUANTIZATION=${QUANTIZATION:-q4_k_m}
         - TORCH_DEVICE=cuda
-    container_name: gec-ollama-api
+    container_name: gec
     ports:
       - "11434:11434"
     environment:
@@ -48,7 +48,7 @@ services:
         - HF_TOKEN=${HF_TOKEN}
         - MODEL_NAME=${MODEL_NAME:-custom-model}
         - QUANTIZATION=${QUANTIZATION:-q4_k_m}
-    container_name: gec-ollama-api-cpu
+    container_name: gec-cpu
     ports:
       - "11434:11434"
     environment:
