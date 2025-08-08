@@ -22,9 +22,9 @@ echo "Quantization: $QUANTIZATION"
 SKIP_QUANTIZATION=false
 if [ -z "$QUANTIZATION" ] || [ "$QUANTIZATION" = "full" ] || [ "$QUANTIZATION" = "orig" ] || [ "$QUANTIZATION" = "f16" ] || [ "$QUANTIZATION" = "f32" ]; then
     SKIP_QUANTIZATION=true
-    echo "no quantization"
+    echo "Quantization disabled (QUANTIZATION=$QUANTIZATION)"
 else
-    echo "applying quantization: $QUANTIZATION"
+    echo "Quantization enabled: $QUANTIZATION"
 fi
 
 cd "$TEMP_DIR"
@@ -65,7 +65,15 @@ rm -rf "$TEMP_DIR/model"
 if [ "$SKIP_QUANTIZATION" = true ]; then
     FINAL_MODEL_FILE="${MODEL_NAME}.gguf"
     echo "Skipping quantization - using original GGUF model"
-    echo "GGUF model location: $MODELS_DIR/$FINAL_MODEL_FILE"
+    echo "Final GGUF model file: $MODELS_DIR/$FINAL_MODEL_FILE"
+    
+    # Verify the file exists
+    if [ ! -f "$MODELS_DIR/$FINAL_MODEL_FILE" ]; then
+        echo "Error: Final model file not found at $MODELS_DIR/$FINAL_MODEL_FILE"
+        echo "Available files in models directory:"
+        ls -la "$MODELS_DIR/" || echo "Models directory doesn't exist"
+        exit 1
+    fi
 else
     echo "Quantizing model..."
         

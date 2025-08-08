@@ -4,20 +4,29 @@ set -e
 MODEL_NAME=${MODEL_NAME:-"custom-model"}
 QUANTIZATION=${QUANTIZATION:-"q4_k_m"}
 
-if [ -z "$QUANTIZATION" ] || [ "$QUANTIZATION" = "full" ] || [ "$QUANTIZATION" = "orig" ] || [ "$QUANTIZATION" = "f16" ] || [ "$QUANTIZATION" = "f32" ]; then
+# Check which file actually exists - unquantized or quantized
+if [ -f "/root/.ollama/models/${MODEL_NAME}.gguf" ]; then
     GGUF_FILE="${MODEL_NAME}.gguf"
-    echo "Looking for unquantized model file: ${GGUF_FILE}"
-else
+    echo "Found unquantized model file: ${GGUF_FILE}"
+elif [ -f "/root/.ollama/models/${MODEL_NAME}-${QUANTIZATION}.gguf" ]; then
     GGUF_FILE="${MODEL_NAME}-${QUANTIZATION}.gguf"
-    echo "Looking for quantized model file: ${GGUF_FILE}"
+    echo "Found quantized model file: ${GGUF_FILE}"
 fi
 
 echo "Setting up Ollama model: $MODEL_NAME"
+echo "Expected GGUF file: ${GGUF_FILE}"
 
 if [ ! -f "/root/.ollama/models/${GGUF_FILE}" ]; then
     echo "Error: Model file not found at /root/.ollama/models/${GGUF_FILE}"
     echo "Available files in /root/.ollama/models/:"
     ls -la /root/.ollama/models/ || echo "Directory doesn't exist"
+    echo ""
+    echo "Checking for any GGUF files with different naming:"
+    find /root/.ollama/models/ -name "*.gguf" -type f 2>/dev/null || echo "No GGUF files found"
+    echo ""
+    echo "Environment variables:"
+    echo "MODEL_NAME: $MODEL_NAME"
+    echo "QUANTIZATION: $QUANTIZATION"
     exit 1
 fi
 
