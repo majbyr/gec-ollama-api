@@ -20,7 +20,7 @@ echo "Target model name: $MODEL_NAME"
 echo "Quantization: $QUANTIZATION"
 
 SKIP_QUANTIZATION=false
-if [ -z "$QUANTIZATION" ] || [ "$QUANTIZATION" = "full" ] || [ "$QUANTIZATION" = "orig" ] || [ "$QUANTIZATION" = "f16" ] || [ "$QUANTIZATION" = "f32" ]; then
+if [ -z "$QUANTIZATION" ] || [ "$QUANTIZATION" = "full" ] || [ "$QUANTIZATION" = "orig" ]; then
     SKIP_QUANTIZATION=true
     echo "Quantization disabled (QUANTIZATION=$QUANTIZATION)"
 else
