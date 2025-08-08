@@ -93,8 +93,12 @@ RUN chmod +x /opt/ollama/*.sh
 
 RUN /opt/ollama/setup_model.sh
 
-# Clean up setup scripts after model is imported
-RUN rm -rf /opt/ollama/setup_model.sh
+# Clean up after model is imported
+RUN rm -rf /opt/ollama/setup_model.sh && \
+    echo "Setup completed, showing ollama directory contents:" && \
+    du -sh /root/.ollama/* 2>/dev/null || echo "No files in .ollama directory" && \
+    echo "Total .ollama directory size:" && \
+    du -sh /root/.ollama/ 2>/dev/null || echo "Directory doesn't exist"
 
 FROM ollama/ollama:latest
 
