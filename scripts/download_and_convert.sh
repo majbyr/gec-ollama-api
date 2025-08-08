@@ -59,6 +59,9 @@ if [ ! -f "$MODELS_DIR/${MODEL_NAME}.gguf" ]; then
     exit 1
 fi
 
+echo "Cleaning up HuggingFace model files to save space..."
+rm -rf "$TEMP_DIR/model"
+
 if [ "$SKIP_QUANTIZATION" = true ]; then
     FINAL_MODEL_FILE="${MODEL_NAME}.gguf"
     echo "Skipping quantization - using original GGUF model"
@@ -92,10 +95,13 @@ else
     echo "Model conversion completed successfully!"
     echo "GGUF model location: $MODELS_DIR/$FINAL_MODEL_FILE"
     
+    echo "Cleaning up unquantized GGUF model to save space..."
     rm -f "$MODELS_DIR/${MODEL_NAME}.gguf"
 fi
 
 rm -rf "$TEMP_DIR/cache"
+echo "Cleaning up any remaining temporary files..."
+rm -rf "$TEMP_DIR"
 
 echo "Conversion process completed!"
 echo "Final model file: $MODELS_DIR/$FINAL_MODEL_FILE"

@@ -65,6 +65,12 @@ RUN if [ -n "$HF_MODEL_NAME" ]; then \
         mkdir -p /workspace/models; \
     fi
 
+# Clean up conversion tools and dependencies to save space
+RUN rm -rf /opt/llama.cpp /opt/llama-cpp-repo /workspace/scripts /workspace/temp \
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /root/.cache/pip
+
 FROM ollama/ollama:latest as ollama-runtime
 
 # Re-declare build arguments
@@ -86,6 +92,9 @@ COPY ollama/ /opt/ollama/
 RUN chmod +x /opt/ollama/*.sh
 
 RUN /opt/ollama/setup_model.sh
+
+# Clean up setup scripts after model is imported
+RUN rm -rf /opt/ollama/setup_model.sh
 
 FROM ollama/ollama:latest
 

@@ -41,6 +41,9 @@ ollama create "$MODEL_NAME" -f /tmp/Modelfile
 
 if ollama list | grep -q "$MODEL_NAME"; then
     echo "Model '$MODEL_NAME' created successfully in Ollama!"
+    echo "Cleaning up GGUF file to save space..."
+    rm -f "/root/.ollama/models/${GGUF_FILE}"
+    echo "GGUF file removed: ${GGUF_FILE}"
 else
     echo "Error: Failed to create model in Ollama"
     kill $OLLAMA_PID 2>/dev/null || true
