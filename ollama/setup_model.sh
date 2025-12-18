@@ -60,4 +60,6 @@ fi
 kill $OLLAMA_PID 2>/dev/null || true
 wait $OLLAMA_PID 2>/dev/null || true
 
+rm -f /root/.ollama/models/${GGUF_FILE}
+
 echo "Ollama model setup completed!"
