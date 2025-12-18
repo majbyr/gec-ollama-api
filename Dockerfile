@@ -1,18 +1,14 @@
-FROM nvidia/cuda:12.1.0-devel-ubuntu22.04 as model-converter
+FROM python:3.11-slim as model-converter
 
 RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
     git \
     wget \
     curl \
     unzip \
-    && rm -rf /var/lib/apt/lists/* \
-    && ln -sf /usr/bin/python3 /usr/bin/python \
-    && ln -sf /usr/bin/pip3 /usr/bin/pip
+    && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cu121
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
 RUN pip install --no-cache-dir \
     transformers \
     sentencepiece \
@@ -30,7 +26,6 @@ RUN wget https://github.com/ggml-org/llama.cpp/releases/download/b6039/llama-b60
     rm -rf build llama-b6039-bin-ubuntu-x64.zip && \
     chmod +x llama.cpp/*
 
-# Clone llama.cpp repo for conversion scripts
 RUN git clone https://github.com/ggerganov/llama.cpp.git llama-cpp-repo && \
     ls -la llama-cpp-repo/ && \
     cp llama-cpp-repo/convert_hf_to_gguf.py llama.cpp/ && \
@@ -44,18 +39,15 @@ WORKDIR /workspace
 COPY scripts/ /workspace/scripts/
 RUN chmod +x /workspace/scripts/*.sh
 
-# Build arguments for model configuration
 ARG HF_MODEL_NAME
 ARG HF_TOKEN
-ARG MODEL_NAME=custom-model
-ARG QUANTIZATION=q4_k_m
-ARG TORCH_DEVICE=cuda
+ARG MODEL_NAME
+ARG QUANTIZATION
 
 ENV HF_MODEL_NAME=${HF_MODEL_NAME}
 ENV HF_TOKEN=${HF_TOKEN}
 ENV MODEL_NAME=${MODEL_NAME}
 ENV QUANTIZATION=${QUANTIZATION}
-ENV TORCH_DEVICE=${TORCH_DEVICE}
 
 # Download and convert model
 RUN if [ -n "$HF_MODEL_NAME" ]; then \
@@ -65,12 +57,6 @@ RUN if [ -n "$HF_MODEL_NAME" ]; then \
         mkdir -p /workspace/models; \
     fi
 
-# Clean up conversion tools and dependencies to save space
-RUN rm -rf /opt/llama.cpp /opt/llama-cpp-repo /workspace/scripts /workspace/temp \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /root/.cache/pip
-
 FROM ollama/ollama:latest as ollama-runtime
 
 # Re-declare build arguments
@@ -78,13 +64,11 @@ ARG HF_MODEL_NAME
 ARG HF_TOKEN
 ARG MODEL_NAME=custom-model
 ARG QUANTIZATION=q4_k_m
-ARG TORCH_DEVICE=cuda
 
 ENV HF_MODEL_NAME=${HF_MODEL_NAME}
 ENV HF_TOKEN=${HF_TOKEN}
 ENV MODEL_NAME=${MODEL_NAME}
 ENV QUANTIZATION=${QUANTIZATION}
-ENV TORCH_DEVICE=${TORCH_DEVICE}
 
 COPY --from=model-converter /workspace/models/ /root/.ollama/models/
 
@@ -107,13 +91,11 @@ ARG HF_MODEL_NAME
 ARG HF_TOKEN
 ARG MODEL_NAME=custom-model
 ARG QUANTIZATION=q4_k_m
-ARG TORCH_DEVICE=cuda
 
 ENV HF_MODEL_NAME=${HF_MODEL_NAME}
 ENV HF_TOKEN=${HF_TOKEN}
 ENV MODEL_NAME=${MODEL_NAME}
 ENV QUANTIZATION=${QUANTIZATION}
-ENV TORCH_DEVICE=${TORCH_DEVICE}
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 

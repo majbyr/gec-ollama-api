@@ -1,26 +1,21 @@
 version: '3.8'
 
 services:
-# gpu
-  ollama-api:
+  gec:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        - HF_MODEL_NAME=${HF_MODEL_NAME}
+        - HF_MODEL_NAME=tartuNLP/Llama-3.1-8B-est-gec-july-2025 
         - HF_TOKEN=${HF_TOKEN}
-        - MODEL_NAME=${MODEL_NAME:-custom-model}
-        - QUANTIZATION=${QUANTIZATION:-q4_k_m}
-        - TORCH_DEVICE=cuda
+        - MODEL_NAME=gec
+        - QUANTIZATION=full
     container_name: gec
     ports:
-      - "11434:11434"
+      - "11435:11434"
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
-    volumes:
-      - ollama_data:/root/.ollama
-      - model_cache:/workspace/cache
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
@@ -38,25 +33,21 @@ services:
     profiles:
       - gpu
 
-  # cpu
-  ollama-api-cpu:
+  ged:
     build:
       context: .
-      dockerfile: Dockerfile.cpu
+      dockerfile: Dockerfile
       args:
-        - HF_MODEL_NAME=${HF_MODEL_NAME}
+        - HF_MODEL_NAME=tartuNLP/Llama-3.1-8B-est-ged-july-2025
         - HF_TOKEN=${HF_TOKEN}
-        - MODEL_NAME=${MODEL_NAME:-custom-model}
-        - QUANTIZATION=${QUANTIZATION:-q4_k_m}
-    container_name: gec-cpu
+        - MODEL_NAME=ged
+        - QUANTIZATION=full
+    container_name: ged
     ports:
-      - "11434:11434"
+      - "11436:11434"
     environment:
       - OLLAMA_HOST=0.0.0.0
       - OLLAMA_ORIGINS=*
-    volumes:
-      - ollama_data:/root/.ollama
-      - model_cache:/workspace/cache
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
@@ -64,11 +55,44 @@ services:
       timeout: 10s
       retries: 3
       start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
     profiles:
-      - cpu
+      - gpu
 
-volumes:
-  ollama_data:
-    driver: local
-  model_cache:
-    driver: local
+  gee:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - HF_MODEL_NAME=tartuNLP/Llama-3.1-8B-est-gee-july-2025
+        - HF_TOKEN=${HF_TOKEN}
+        - MODEL_NAME=gee
+        - QUANTIZATION=q8_0
+    container_name: gee
+    ports:
+      - "11437:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_ORIGINS=*
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    profiles:
+      - gpu
