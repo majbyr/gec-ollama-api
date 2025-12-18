@@ -2,6 +2,8 @@
 
 A Docker-based solution that downloads fine-tuned models from Hugging Face, converts them to GGUF format, and deploys them with Ollama as an API. Specifically configured for Estonian Grammar Error Correction (GEC) using the Llama-3.1-8B model.
 
+The APIs are compatible with [grammar correction API (ollama branch)](https://github.com/TartuNLP/grammar-api/tree/migration-ollama).
+
 ## Features
 
 - Download models from Hugging Face
